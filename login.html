@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prijava</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .form-container {
+            width: 350px;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            transform: scale(0);
+            animation: scaleUp 0.5s ease-out forwards;
+        }
+
+        @keyframes scaleUp {
+            0% {
+                transform: scale(0);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .message {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+            font-weight: bold;
+            text-transform: capitalize;
+            transition: opacity 0.5s ease;
+        }
+
+        .message.show {
+            opacity: 1;
+        }
+
+        .message.hide {
+            opacity: 0;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            background-color: #4CAF50;
+            bottom: 0;
+            left: 50%;
+            transition: width 0.3s ease, left 0.3s ease;
+        }
+
+        .input-wrapper input:focus + .input-wrapper::before {
+            width: 100%;
+            left: 0;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Prijava</h2>
+        <form id="loginForm">
+            <div class="input-wrapper">
+                <input type="text" id="username" placeholder="Korisničko ime" required>
+            </div>
+            <div class="input-wrapper">
+                <input type="password" id="password" placeholder="Lozinka" required>
+            </div>
+            <button type="submit">Prijavi se</button>
+            <p id="message" class="message"></p>
+        </form>
+    </div>
+
+    <script>
+document.getElementById('loginForm').addEventListener('submit', function(event) {
+    event.preventDefault();  // Sprečava da stranica bude osvežena
+
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    // Proveri da li su uneseni podaci
+    if (!username || !password) {
+        document.getElementById('message').innerText = "Korisničko ime i lozinka su obavezni!";
+        document.getElementById('message').classList.add('show');
+        return;
+    }
+
+    console.log('Slanje podataka...'); // Ova linija ti pomaže da vidiš da li je fetch pozvan
+
+    // Slanje podataka serveru
+    fetch('http://localhost:3000/login', {  // Proveri da li je URL ispravan
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username, password })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);  // Pomoćna linija za debagovanje
+        if (data.status === 'success') {
+            localStorage.setItem("korisnik", username); // Sačuvaj prijavljenog korisnika
+            alert(data.message);
+            window.location.href = "home.html"; // Redirektuj korisnika na glavnu stranicu (ili bilo koju drugu)
+
+            // Zatvori stranicu za prijavu nakon uspešne prijave
+            window.close();
+        } else {
+            document.getElementById('message').innerText = data.message;
+            document.getElementById('message').classList.add('show');
+        }
+    })
+    .catch(error => {
+        console.error('Greška:', error);
+        document.getElementById('message').innerText = 'Došlo je do greške.';
+        document.getElementById('message').classList.add('show');
+    });
+});
+    </script>
+</body>
+</html>
